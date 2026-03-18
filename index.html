@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hydrio — Legal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:          #0B0B0B;
+    --bg2:         #111111;
+    --card:        #161616;
+    --border:      rgba(255,255,255,0.07);
+    --gold1:       #D4AF37;
+    --gold2:       #FFD700;
+    --blue:        #4DA6FF;
+    --text1:       #F5F5F0;
+    --text2:       #A0A0A0;
+    --text3:       #505050;
+    --success:     #4CAF50;
+    --gold-grad:   linear-gradient(135deg, #D4AF37, #FFD700);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text1);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.75;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Noise texture ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── Ambient glow ── */
+  .glow-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glow-orb.gold {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(212,175,55,0.08) 0%, transparent 70%);
+    top: -200px; right: -200px;
+  }
+  .glow-orb.blue {
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(77,166,255,0.06) 0%, transparent 70%);
+    bottom: 200px; left: -100px;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative; z-index: 10;
+    padding: 60px 40px 0;
+    max-width: 860px; margin: 0 auto;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 64px;
+  }
+
+  .logo-drop {
+    width: 36px; height: 36px;
+    background: var(--gold-grad);
+    clip-path: polygon(50% 0%, 80% 30%, 100% 60%, 80% 85%, 50% 100%, 20% 85%, 0% 60%, 20% 30%);
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform: scale(1); }
+    50%      { opacity:0.8; transform: scale(0.95); }
+  }
+
+  .logo-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 600;
+    background: var(--gold-grad);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 0.05em;
+  }
+
+  .hero-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--gold1);
+    margin-bottom: 16px;
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(42px, 7vw, 72px);
+    font-weight: 300; line-height: 1.1;
+    color: var(--text1);
+    margin-bottom: 20px;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    background: var(--gold-grad);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    font-size: 15px; color: var(--text2);
+    max-width: 480px; margin-bottom: 40px;
+  }
+
+  .meta-row {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    font-size: 12px; color: var(--text3);
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .meta-row span { display: flex; align-items: center; gap: 6px; }
+  .meta-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold1); }
+
+  /* ── Nav tabs ── */
+  .tab-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(11,11,11,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+  }
+
+  .tab-nav-inner {
+    max-width: 860px; margin: 0 auto;
+    display: flex; gap: 0;
+  }
+
+  .tab-btn {
+    padding: 18px 28px;
+    background: none; border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 400;
+    color: var(--text3); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    position: relative; top: 1px;
+    letter-spacing: 0.02em;
+  }
+
+  .tab-btn.active { color: var(--gold1); border-bottom-color: var(--gold1); }
+  .tab-btn:hover:not(.active) { color: var(--text2); }
+
+  /* ── Main layout ── */
+  main {
+    position: relative; z-index: 5;
+    max-width: 860px; margin: 0 auto;
+    padding: 0 40px 120px;
+  }
+
+  .doc-section { display: none; padding-top: 60px; }
+  .doc-section.active { display: block; animation: fadeUp 0.4s ease both; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Section blocks ── */
+  .section-block {
+    margin-bottom: 48px;
+    padding: 36px 40px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+  }
+
+  .section-block:hover { border-color: rgba(212,175,55,0.15); }
+
+  .section-block::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--gold-grad);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .section-block:hover::before { opacity: 1; }
+
+  .section-num {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--gold1);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .section-num::after {
+    content: '';
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, rgba(212,175,55,0.3), transparent);
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px; font-weight: 600;
+    color: var(--text1); margin-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  p { color: var(--text2); margin-bottom: 14px; font-size: 14px; line-height: 1.8; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── Subsections ── */
+  .sub-title {
+    font-size: 13px; font-weight: 500;
+    color: var(--text1); margin: 24px 0 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .sub-title::before {
+    content: '';
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--blue); flex-shrink: 0;
+  }
+
+  /* ── Lists ── */
+  ul, ol { padding-left: 0; list-style: none; }
+  li {
+    font-size: 14px; color: var(--text2);
+    padding: 6px 0 6px 20px;
+    position: relative; line-height: 1.7;
+  }
+  li::before {
+    content: '—';
+    position: absolute; left: 0;
+    color: var(--gold1); font-size: 12px;
+  }
+
+  /* ── Warning box ── */
+  .warning-box {
+    background: rgba(212,175,55,0.06);
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+
+  .warning-box .w-label {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold1); margin-bottom: 8px;
+  }
+
+  .warning-box p { color: rgba(245,245,240,0.7); font-size: 13px; margin: 0; }
+
+  /* ── Info chips ── */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .chip {
+    padding: 6px 14px;
+    background: rgba(77,166,255,0.08);
+    border: 1px solid rgba(77,166,255,0.2);
+    border-radius: 100px;
+    font-size: 12px; color: var(--blue);
+    font-weight: 400;
+  }
+  .chip.gold {
+    background: rgba(212,175,55,0.08);
+    border-color: rgba(212,175,55,0.2);
+    color: var(--gold1);
+  }
+  .chip.green {
+    background: rgba(76,175,80,0.08);
+    border-color: rgba(76,175,80,0.2);
+    color: var(--success);
+  }
+
+  /* ── Pricing card ── */
+  .pricing-card {
+    background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(255,215,0,0.04));
+    border: 1px solid rgba(212,175,55,0.25);
+    border-radius: 16px; padding: 32px;
+    margin: 20px 0; text-align: center;
+  }
+
+  .pricing-badge {
+    display: inline-block;
+    background: var(--gold-grad);
+    color: #0B0B0B; font-size: 11px;
+    font-weight: 500; letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 14px; border-radius: 100px;
+    margin-bottom: 20px;
+  }
+
+  .pricing-amount {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 56px; font-weight: 300;
+    background: var(--gold-grad);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+
+  .pricing-period {
+    font-size: 13px; color: var(--text3);
+    margin-top: 6px; margin-bottom: 20px;
+  }
+
+  .pricing-features {
+    display: flex; flex-wrap: wrap;
+    justify-content: center; gap: 8px;
+  }
+
+  /* ── Table ── */
+  .data-table {
+    width: 100%; border-collapse: collapse;
+    margin: 16px 0; font-size: 13px;
+  }
+  .data-table th {
+    text-align: left; padding: 10px 16px;
+    font-size: 11px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--gold1);
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+  .data-table td {
+    padding: 12px 16px; color: var(--text2);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .dot-no  { color: #FF5252; }
+  .dot-yes { color: var(--success); }
+
+  /* ── Links ── */
+  a { color: var(--blue); text-decoration: none; transition: color 0.2s; }
+  a:hover { color: #7DBFFF; text-decoration: underline; }
+
+  /* ── Contact card ── */
+  .contact-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px 24px;
+    display: flex; align-items: center;
+    gap: 16px; margin: 12px 0;
+    transition: border-color 0.2s;
+  }
+  .contact-card:hover { border-color: rgba(77,166,255,0.2); }
+  .contact-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(77,166,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .contact-label { font-size: 11px; color: var(--text3); letter-spacing: 0.05em; margin-bottom: 3px; }
+  .contact-val { font-size: 13px; color: var(--blue); }
+
+  /* ── Footer ── */
+  footer {
+    position: relative; z-index: 5;
+    border-top: 1px solid var(--border);
+    padding: 40px;
+    max-width: 860px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: gap;
+  }
+
+  .footer-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    background: var(--gold-grad);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .footer-text { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold1); }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    header, main { padding-left: 20px; padding-right: 20px; }
+    .tab-nav { padding: 0 20px; }
+    .section-block { padding: 24px 20px; }
+    .tab-btn { padding: 16px 16px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-orb gold"></div>
+<div class="glow-orb blue"></div>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <div class="logo-drop"></div>
+    <span class="logo-name">Hydrio</span>
+  </div>
+
+  <div class="hero-label">Legal Documents</div>
+  <h1 class="hero-title">Privacy &amp; <em>Terms</em></h1>
+  <p class="hero-sub">We believe in radical transparency. Here's exactly how Hydrio handles your data — clearly, with no hidden clauses.</p>
+
+  <div class="meta-row">
+    <span><span class="meta-dot"></span> Effective: March 18, 2026</span>
+    <span><span class="meta-dot"></span> Last updated: March 18, 2026</span>
+    <span><span class="meta-dot"></span> iOS App · App Store</span>
+  </div>
+</header>
+
+<!-- Nav -->
+<nav class="tab-nav">
+  <div class="tab-nav-inner">
+    <button class="tab-btn active" onclick="switchTab('privacy', this)">Privacy Policy</button>
+    <button class="tab-btn" onclick="switchTab('terms', this)">Terms of Service</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ══════════ PRIVACY POLICY ══════════ -->
+  <div id="privacy" class="doc-section active">
+
+    <div class="section-block">
+      <div class="section-num">01</div>
+      <div class="section-title">The Short Version</div>
+      <p>Hydrio does not collect, transmit, or share any personal data. Everything you enter — your name, weight, drink logs, streaks, achievements — lives only on your device. We have no servers. We have no accounts. We cannot see your data.</p>
+      <div class="chip-row">
+        <span class="chip green">✓ No data collection</span>
+        <span class="chip green">✓ No cloud sync</span>
+        <span class="chip green">✓ No third-party trackers</span>
+        <span class="chip green">✓ No ads ever</span>
+      </div>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">02</div>
+      <div class="section-title">Information We Store</div>
+      <p>When you set up Hydrio, you provide some profile data. This is stored <strong style="color:var(--text1)">exclusively on your device</strong> and is used only to personalize your experience.</p>
+
+      <div class="sub-title">Data you provide</div>
+      <table class="data-table">
+        <thead><tr><th>Data</th><th>Purpose</th><th>Leaves Device?</th></tr></thead>
+        <tbody>
+          <tr><td>Name</td><td>Personalisation</td><td class="dot-no">✗ Never</td></tr>
+          <tr><td>Weight</td><td>Goal calculation</td><td class="dot-no">✗ Never</td></tr>
+          <tr><td>Gender</td><td>Goal calculation</td><td class="dot-no">✗ Never</td></tr>
+          <tr><td>Activity level</td><td>Goal adjustment</td><td class="dot-no">✗ Never</td></tr>
+          <tr><td>Drink logs</td><td>Tracking &amp; stats</td><td class="dot-no">✗ Never</td></tr>
+          <tr><td>Achievements</td><td>Gamification</td><td class="dot-no">✗ Never</td></tr>
+          <tr><td>Reminder prefs</td><td>Local notifications</td><td class="dot-no">✗ Never</td></tr>
+        </tbody>
+      </table>
+
+      <div class="sub-title">Data we never collect</div>
+      <ul>
+        <li>Email addresses, phone numbers, or Apple ID</li>
+        <li>Analytics, crash logs, or usage telemetry</li>
+        <li>Location data of any kind</li>
+        <li>Camera, microphone, or contacts access</li>
+        <li>Browser history or cross-app activity</li>
+        <li>Advertising identifiers (IDFA)</li>
+      </ul>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">03</div>
+      <div class="section-title">Notifications</div>
+      <p>Hydrio's hydration reminders are powered entirely by Apple's local notification system — generated on-device, delivered on-device, with zero server involvement.</p>
+      <ul>
+        <li>Available intervals: 30 minutes, 1 hour, 2 hours</li>
+        <li>Fully optional — enable during onboarding or in Settings</li>
+        <li>Disable anytime: <strong style="color:var(--text1)">iOS Settings → Notifications → Hydrio</strong></li>
+      </ul>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">04</div>
+      <div class="section-title">In-App Purchase</div>
+      <p>Hydrio offers a one-time <strong style="color:var(--text1)">Lifetime Premium</strong> purchase processed entirely by Apple. We never see or store your payment details.</p>
+
+      <div class="pricing-card">
+        <div class="pricing-badge">Hydrio Premium</div>
+        <div class="pricing-amount">$4.99</div>
+        <div class="pricing-period">One-time · Lifetime access · No subscription</div>
+        <div class="pricing-features">
+          <span class="chip gold">Advanced insights</span>
+          <span class="chip gold">Smart reminders</span>
+          <span class="chip gold">Full achievements</span>
+          <span class="chip gold">Unlimited drink types</span>
+        </div>
+      </div>
+
+      <p>All payment processing is handled by Apple under their <a href="https://www.apple.com/legal/privacy/" target="_blank">Privacy Policy</a>. For refunds, visit <a href="https://reportaproblem.apple.com" target="_blank">reportaproblem.apple.com</a>.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">05</div>
+      <div class="section-title">Data Security &amp; Deletion</div>
+      <p>Your data is secured by your device's native protection — Face ID, Touch ID, and iOS encryption. We recommend keeping iOS up to date.</p>
+      <div class="sub-title">Delete your data</div>
+      <ul>
+        <li><strong style="color:var(--text1)">In-app:</strong> Settings → Data → Reset All Data</li>
+        <li><strong style="color:var(--text1)">Complete removal:</strong> Delete the Hydrio app from your device</li>
+      </ul>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">06</div>
+      <div class="section-title">Children's Privacy</div>
+      <p>Hydrio collects no personal data from any user, making it inherently safe for all ages. We do not knowingly collect data from children under 13.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">07</div>
+      <div class="section-title">Contact Us</div>
+      <div class="contact-card">
+        <div class="contact-icon">⚡</div>
+        <div>
+          <div class="contact-label">GitHub Issues</div>
+          <a href="https://github.com/your-username/hydrio/issues" class="contact-val" target="_blank">github.com/your-username/hydrio/issues</a>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">✉️</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <a href="mailto:Manhcuong531@email.com" class="contact-val">Manhcuong531@email.com</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /privacy -->
+
+  <!-- ══════════ TERMS OF SERVICE ══════════ -->
+  <div id="terms" class="doc-section">
+
+    <div class="section-block">
+      <div class="section-num">01</div>
+      <div class="section-title">Acceptance of Terms</div>
+      <p>By downloading, installing, or using Hydrio ("the app"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the app.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">02</div>
+      <div class="section-title">What Hydrio Does</div>
+      <p>Hydrio is a premium personal hydration tracking application for iOS that helps you:</p>
+      <ul>
+        <li>Track daily water and beverage intake — water, tea, coffee, juice</li>
+        <li>Set personalized goals based on weight, gender, and activity level</li>
+        <li>Receive local on-device reminders to drink water</li>
+        <li>Monitor hydration history, streaks, and detailed statistics</li>
+        <li>Earn achievements and gamification rewards</li>
+        <li>Access an AI hydration coach with personalized daily insights</li>
+      </ul>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">03</div>
+      <div class="section-title">Medical Disclaimer</div>
+      <div class="warning-box">
+        <div class="w-label">⚠ Important</div>
+        <p>Hydrio is not a medical application. Hydration recommendations are for general wellness purposes only and do not replace professional medical advice.</p>
+      </div>
+      <p>The goal calculations based on your weight, gender, and activity level are general estimates. Individual hydration needs vary significantly based on health conditions, climate, medications, and other factors.</p>
+      <p>Always consult a qualified healthcare professional regarding your hydration needs — especially if you have conditions affecting fluid intake such as kidney disease, heart failure, or diabetes.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">04</div>
+      <div class="section-title">Hydrio Premium — Lifetime</div>
+      <p>Hydrio offers an optional one-time purchase unlocking Premium features permanently.</p>
+
+      <div class="pricing-card">
+        <div class="pricing-badge">One-Time Purchase</div>
+        <div class="pricing-amount">$4.99</div>
+        <div class="pricing-period">Pay once · Use forever · No recurring charges</div>
+        <div class="pricing-features">
+          <span class="chip gold">Advanced insights</span>
+          <span class="chip gold">Smart reminders</span>
+          <span class="chip gold">Full achievements</span>
+          <span class="chip gold">Unlimited drink types</span>
+        </div>
+      </div>
+
+      <div class="sub-title">Billing & Refunds</div>
+      <ul>
+        <li>Processed by Apple through the App Store — we never handle payment details</li>
+        <li>This is a one-time purchase, not a subscription — you will never be charged again</li>
+        <li>Refunds must be requested directly via <a href="https://reportaproblem.apple.com" target="_blank">reportaproblem.apple.com</a></li>
+        <li>Subject to <a href="https://www.apple.com/legal/internet-services/itunes/" target="_blank">Apple's Terms of Sale</a></li>
+      </ul>
+
+      <div class="sub-title">Price Changes</div>
+      <p>We reserve the right to change the purchase price at any time. Changes do not affect users who have already purchased Premium.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">05</div>
+      <div class="section-title">Notifications</div>
+      <p>By enabling hydration reminders, you consent to receiving local notifications from Hydrio. These are generated entirely on your device — no server is involved.</p>
+      <p>Disable anytime: <strong style="color:var(--text1)">iOS Settings → Notifications → Hydrio → Allow Notifications (off)</strong></p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">06</div>
+      <div class="section-title">User Responsibilities</div>
+      <ul>
+        <li>Use Hydrio only for its intended personal wellness purpose</li>
+        <li>Do not attempt to reverse engineer, decompile, or modify the app</li>
+        <li>Do not use the app in violation of applicable laws</li>
+        <li>Consult a healthcare professional before making significant changes to your hydration habits</li>
+      </ul>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">07</div>
+      <div class="section-title">Intellectual Property</div>
+      <p>All content within Hydrio — including the app name, design, graphics, icons, animations, pet characters, and code — is the intellectual property of the developer. You are granted a limited, non-exclusive, non-transferable licence to use the app for personal, non-commercial purposes only.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">08</div>
+      <div class="section-title">Disclaimer of Warranties</div>
+      <p>Hydrio is provided <strong style="color:var(--text1)">"as is"</strong> without warranties of any kind. We do not guarantee:</p>
+      <ul>
+        <li>The app will be error-free or uninterrupted at all times</li>
+        <li>Data will be preserved after device failure or app deletion</li>
+        <li>Hydration recommendations will suit your individual health needs</li>
+        <li>Streak and achievement history will be recoverable after a data reset</li>
+      </ul>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">09</div>
+      <div class="section-title">Limitation of Liability</div>
+      <p>To the maximum extent permitted by applicable law, the developer of Hydrio shall not be liable for any indirect, incidental, or consequential damages, including loss of data due to device failure or health outcomes resulting from in-app recommendations.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">10</div>
+      <div class="section-title">Changes to Terms</div>
+      <p>We reserve the right to update these Terms at any time. The "Last Updated" date at the top of this page reflects the most recent revision. Significant changes will also be noted in App Store release notes. Continued use of Hydrio after changes constitutes your acceptance.</p>
+    </div>
+
+    <div class="section-block">
+      <div class="section-num">11</div>
+      <div class="section-title">Contact Us</div>
+      <div class="contact-card">
+        <div class="contact-icon">⚡</div>
+        <div>
+          <div class="contact-label">GitHub Issues</div>
+          <a href="https://github.com/your-username/hydrio/issues" class="contact-val" target="_blank">github.com/your-username/hydrio/issues</a>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">✉️</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <a href="mailto:Manhcuong531@Gmail.com" class="contact-val">Manhcuong531@Gmail.com</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /terms -->
+
+</main>
+
+<footer style="padding: 40px; border-top: 1px solid var(--border); max-width: 860px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+  <div>
+    <div class="footer-brand">Hydrio</div>
+    <div class="footer-text">Your health data belongs to you, and only you.</div>
+  </div>
+  <div style="font-size:12px; color:var(--text3); text-align:right;">
+    <div>© 2026 Hydrio</div>
+    <div style="margin-top:4px;">Made with 💧 for your health</div>
+  </div>
+</footer>
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.doc-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
