@@ -1,0 +1,145 @@
+# Privacy Policy
+
+**App Name:** Hydrio  
+**Effective Date:** March 18, 2026  
+**Last Updated:** March 18, 2026
+
+---
+
+## 1. Overview
+
+Hydrio ("we", "our", or "the app") is committed to protecting your privacy. This Privacy Policy explains how we handle information when you use Hydrio on your iOS device.
+
+**Short version:** Hydrio does not collect, transmit, or share any personal data with us or any third party. Everything stays on your device.
+
+---
+
+## 2. Information We Collect
+
+### 2.1 Data You Provide (Stored Locally Only)
+Hydrio stores the following data **exclusively on your device**:
+
+| Data | Purpose |
+|------|---------|
+| Name, weight, gender | Personalized hydration goal calculation |
+| Activity level | Adjust recommended daily intake |
+| Drink logs (amount, type, time) | Track hydration history |
+| Daily hydration goals | Progress tracking |
+| Streaks and achievements | Gamification and motivation |
+| Pet progression data | In-app virtual pet feature |
+| Reminder preferences | Local notification scheduling |
+
+**None of this data is transmitted to any server.** Hydrio has no backend, no user accounts, and no cloud sync.
+
+### 2.2 Data We Do NOT Collect
+- ❌ Personal identifiers (email, phone number, Apple ID)
+- ❌ Analytics, crash reports, or usage statistics
+- ❌ Location data
+- ❌ Camera, microphone, or contacts
+- ❌ Advertising identifiers (IDFA)
+- ❌ Any biometric data
+
+---
+
+## 3. Notifications
+
+If you enable hydration reminders during onboarding or in Settings, Hydrio uses **Apple's local notification system**. These notifications are:
+
+- Generated and delivered entirely **on-device** — no push notification servers involved
+- Available at intervals of 30 minutes, 1 hour, or 2 hours (as configured by you)
+- Fully controllable via **iOS Settings → Notifications → Hydrio**
+
+You can disable or modify notifications at any time without affecting your hydration data.
+
+---
+
+## 4. In-App Purchases
+
+Hydrio offers an optional **Hydrio Premium** subscription that unlocks:
+
+- Advanced hydration insights
+- Unlimited drink types
+- Smart reminders
+- Full achievements system
+
+### Purchase Details
+- **Price:** $9.99 for life time access with a one time purchase
+- All transactions are processed exclusively by **Apple** via the App Store
+- We do **not** receive, store, or have access to your payment information
+- Purchases are subject to [Apple's Terms of Sale](https://www.apple.com/legal/internet-services/itunes/)
+
+### Refunds
+Refund requests must be submitted directly to Apple at [reportaproblem.apple.com](https://reportaproblem.apple.com). We are unable to process refunds directly.
+
+### Subscription Management
+You can manage or cancel your subscription at any time via:  
+**iOS Settings → [Your Name] → Subscriptions → Hydrio**
+
+---
+
+## 5. Children's Privacy
+
+Hydrio does not knowingly collect any personal data from anyone, including children under 13. Since all data is stored locally on your device and never transmitted, the app is safe for all ages.
+
+---
+
+## 6. Data Security
+
+Your data is protected by your device's built-in security:
+
+- Face ID / Touch ID / device passcode
+- iOS data protection APIs
+- App sandboxing (your data is inaccessible to other apps)
+
+We recommend keeping your iOS version up to date to benefit from Apple's latest security improvements.
+
+---
+
+## 7. Deleting Your Data
+
+You have full control over your data at all times:
+
+**Option 1 — Reset within the app:**  
+Hydrio → Settings → Data → **Reset All Data**
+
+**Option 2 — Uninstall the app:**  
+Deleting Hydrio from your device permanently removes all locally stored data.
+
+There is no account to delete and no server-side data to request removal of.
+
+---
+
+## 8. Third-Party Services
+
+Hydrio does not integrate with any third-party analytics, advertising, or data platforms. The only third-party involvement is **Apple**, which handles:
+
+- App distribution (App Store)
+- In-App Purchase processing
+- Local notification delivery
+
+All of the above are governed by [Apple's Privacy Policy](https://www.apple.com/legal/privacy/).
+
+---
+
+## 9. Your Rights
+
+Since Hydrio stores no personal data on any server, there is no data for us to access, export, or delete on your behalf. All data exists solely on your device and is entirely under your control.
+
+---
+
+## 10. Changes to This Policy
+
+We may update this Privacy Policy from time to time. When we do, we will update the "Last Updated" date at the top of this document. We encourage you to review this policy periodically. Continued use of Hydrio after changes constitutes your acceptance of the updated policy.
+
+---
+
+## 11. Contact Us
+
+If you have questions or concerns about this Privacy Policy, please reach out:
+
+
+- **Email:** Manhcuong531@email.com
+
+---
+
+*Hydrio — Your health data belongs to you, and only you.*
