@@ -1,24 +1,2 @@
-//
-//  ContentView.swift
-//  Hydrio
-//
-//  Created by Sam Manh Cuong on 18/3/26.
-//
-
+// ContentView.swift is unused — app entry is HydrioApp.swift → MainTabView
 import SwiftUI
-
-struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
-    }
-}
-
-#Preview {
-    ContentView()
-}
