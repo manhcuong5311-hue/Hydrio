@@ -8,8 +8,8 @@ import UserNotifications
 struct SettingsView: View {
     @EnvironmentObject var vm: HydrationViewModel
     @EnvironmentObject var store: StoreManager
-    @EnvironmentObject var premiumManager: PremiumManager
     @EnvironmentObject var notificationWindow: NotificationWindowManager
+    @ObservedObject private var ads = AdsManager.shared
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = true
 
     @State private var weight: Double            = 70
@@ -19,7 +19,7 @@ struct SettingsView: View {
     @State private var reminderInterval: ReminderInterval = .oneHour
 
     @State private var showResetAlert            = false
-    @State private var showPremiumSheet          = false
+    @State private var showRemoveAdsSheet        = false
     @State private var showPrivacySheet          = false
     @State private var showFAQSheet              = false
     @State private var showEULASheet             = false
@@ -48,9 +48,10 @@ struct SettingsView: View {
                     .padding(.horizontal, Spacing.md)
                     .padding(.top, Spacing.md)
 
-                    // MARK: Premium Banner
-                    PremiumBannerCard(isPremium: store.isPremium) {
-                        showPremiumSheet = true
+                    // MARK: Remove Ads
+                    RemoveAdsCard(isAdFree: store.isAdFree,
+                                  price: store.product?.displayPrice) {
+                        showRemoveAdsSheet = true
                     }
                     .padding(.horizontal, Spacing.md)
 
@@ -132,7 +133,7 @@ struct SettingsView: View {
                         }
                     )
 
-                    // MARK: Notification Window (Advanced — Premium)
+                    // MARK: Notification Window
                     NotificationWindowSection(
                         window: notificationWindow,
                         isEnabled: notificationsEnabled,
@@ -144,8 +145,7 @@ struct SettingsView: View {
                                     window: notificationWindow
                                 )
                             }
-                        },
-                        onUpgradeTap: { showPremiumSheet = true }
+                        }
                     )
 
                     // MARK: Pet
@@ -166,78 +166,34 @@ struct SettingsView: View {
                             Divider().background(Color.white.opacity(0.1))
 
                             VStack(alignment: .leading, spacing: 8) {
-                                HStack {
-                                    Text("Choose Your Pet")
-                                        .font(.bodySmall).foregroundStyle(.textSecondary)
-                                    Spacer()
-                                    if !premiumManager.isPremium {
-                                        HStack(spacing: 4) {
-                                            Image(systemName: "lock.fill")
-                                                .font(.system(size: 10, weight: .bold))
-                                                .foregroundStyle(.goldPrimary)
-                                            Text("2 locked")
-                                                .font(.captionSmall).foregroundStyle(.goldPrimary)
-                                        }
-                                        .padding(.horizontal, 8).padding(.vertical, 3)
-                                        .background(Color.goldPrimary.opacity(0.1))
-                                        .clipShape(Capsule())
-                                    }
-                                }
+                                Text("Choose Your Pet")
+                                    .font(.bodySmall).foregroundStyle(.textSecondary)
                                 HStack(spacing: Spacing.sm) {
                                     ForEach(PetType.allCases, id: \.self) { type in
-                                        let locked = premiumManager.isPetLocked(type)
-                                        let selected = vm.pet.type == type && !locked
+                                        let selected = vm.pet.type == type
                                         Button {
-                                            if locked {
-                                                showPremiumSheet = true
-                                            } else {
-                                                vm.changePetType(type)
-                                            }
+                                            vm.changePetType(type)
                                         } label: {
-                                            ZStack {
-                                                VStack(spacing: 4) {
-                                                    Image(systemName: type.icon)
-                                                        .font(.system(size: 20))
-                                                    Text(type.displayName)
-                                                        .font(.captionLarge)
-                                                }
-                                                .frame(maxWidth: .infinity)
-                                                .padding(.vertical, 10)
-                                                .background(
-                                                    selected
-                                                        ? Color.hydrationBlue.opacity(0.25)
-                                                        : Color.white.opacity(0.05)
-                                                )
-                                                .foregroundStyle(
-                                                    locked
-                                                        ? Color.white.opacity(0.25)
-                                                        : (selected ? Color.hydrationBlue : Color.textSecondary)
-                                                )
-                                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                                .overlay(
-                                                    RoundedRectangle(cornerRadius: 10)
-                                                        .stroke(
-                                                            selected
-                                                                ? Color.hydrationBlue.opacity(0.6)
-                                                                : (locked ? Color.goldPrimary.opacity(0.3) : Color.clear),
-                                                            lineWidth: 1.5
-                                                        )
-                                                )
-                                                .blur(radius: locked ? 1.5 : 0)
-
-                                                // Lock overlay
-                                                if locked {
-                                                    VStack(spacing: 2) {
-                                                        Image(systemName: "lock.fill")
-                                                            .font(.system(size: 12, weight: .bold))
-                                                            .foregroundStyle(.goldPrimary)
-                                                        Text("Premium")
-                                                            .font(.captionSmall)
-                                                            .fontWeight(.semibold)
-                                                            .foregroundStyle(.goldPrimary)
-                                                    }
-                                                }
+                                            VStack(spacing: 4) {
+                                                Image(systemName: type.icon)
+                                                    .font(.system(size: 20))
+                                                Text(type.displayName)
+                                                    .font(.captionLarge)
                                             }
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 10)
+                                            .background(
+                                                selected
+                                                    ? Color.hydrationBlue.opacity(0.25)
+                                                    : Color.white.opacity(0.05)
+                                            )
+                                            .foregroundStyle(selected ? Color.hydrationBlue : Color.textSecondary)
+                                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .stroke(selected ? Color.hydrationBlue.opacity(0.6) : Color.clear,
+                                                            lineWidth: 1.5)
+                                            )
                                         }
                                         .buttonStyle(.plain)
                                     }
@@ -264,12 +220,12 @@ struct SettingsView: View {
                                 showEULASheet = true
                             }
                             SettingsDivider()
-                            // Restore Purchase row
+                            // Restore Purchases row
                             Button {
                                 Task {
                                     await store.restore()
-                                    if store.isPremium {
-                                        restoreMessage = "Your purchase has been restored successfully."
+                                    if store.isAdFree {
+                                        restoreMessage = "Your purchase has been restored — ads are removed."
                                     } else {
                                         restoreMessage = store.purchaseState.errorMessage
                                             ?? "No previous purchases found for this Apple ID."
@@ -291,7 +247,7 @@ struct SettingsView: View {
                                                 .foregroundStyle(.goldPrimary)
                                         }
                                     }
-                                    Text("Restore Purchase")
+                                    Text("Restore Purchases")
                                         .font(.bodyMedium).foregroundStyle(.textPrimary)
                                     Spacer()
                                     Image(systemName: "chevron.right")
@@ -301,6 +257,14 @@ struct SettingsView: View {
                             }
                             .buttonStyle(.plain)
                             .disabled(store.purchaseState.isLoading)
+                            // Required by Google for EEA/UK users: let them change ad consent.
+                            if ads.adsEnabled && ads.privacyOptionsRequired {
+                                SettingsDivider()
+                                SupportRow(icon: "hand.raised.fill", iconColor: Color(hex: "26A69A"),
+                                           title: "Ad privacy choices") {
+                                    ads.presentPrivacyOptions()
+                                }
+                            }
                             SettingsDivider()
                             RateAppRow()
                         }
@@ -349,13 +313,7 @@ struct SettingsView: View {
 
                     // Footer
                     VStack(spacing: Spacing.xs) {
-                        if store.isPremium {
-                            HStack(spacing: 4) {
-                                Image(systemName: "crown.fill").font(.captionSmall).foregroundStyle(.goldPrimary)
-                                Text("Hydrio Premium").font(.captionLarge).foregroundStyle(.goldPrimary)
-                            }
-                        }
-                        Text("Version 1.0.0").font(.captionSmall).foregroundStyle(.textTertiary)
+                        Text("Version \(appVersion)").font(.captionSmall).foregroundStyle(.textTertiary)
                         Text("Made with 💧 for your health").font(.captionSmall).foregroundStyle(.textTertiary)
                     }
                     .frame(maxWidth: .infinity)
@@ -376,16 +334,14 @@ struct SettingsView: View {
         } message: {
             Text("This will delete all your drink logs, streaks, and achievements. This cannot be undone.")
         }
-        .sheet(isPresented: $showPremiumSheet) {
-            PremiumSheet()
-                .environmentObject(store)
-                .environmentObject(premiumManager)
+        .sheet(isPresented: $showRemoveAdsSheet) {
+            RemoveAdsSheet().environmentObject(store)
         }
         .sheet(isPresented: $showPrivacySheet) { SafariSheet(url: privacyURL) }
         .sheet(isPresented: $showFAQSheet)     { FAQSheet() }
         .sheet(isPresented: $showEULASheet)    { SafariSheet(url: eulaURL) }
         .sheet(isPresented: $showWHOSheet)     { SafariSheet(url: whoURL) }
-        .alert("Restore Purchase", isPresented: $showRestoreResult) {
+        .alert("Restore Purchases", isPresented: $showRestoreResult) {
             Button("OK", role: .cancel) {}
         } message: {
             Text(restoreMessage)
@@ -393,6 +349,10 @@ struct SettingsView: View {
     }
 
     // MARK: - Helpers
+
+    private var appVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+    }
 
     private func loadSettings() {
         weight             = vm.profile.weight
@@ -451,112 +411,6 @@ struct SettingsView: View {
          "aquaflow_achievements","aquaflow_pet","hasCompletedOnboarding"]
             .forEach { UserDefaults.standard.removeObject(forKey: $0) }
         hasCompletedOnboarding = false
-    }
-}
-
-// MARK: - Premium Banner Card
-
-struct PremiumBannerCard: View {
-    let isPremium: Bool
-    let onTap: () -> Void
-
-    @State private var shimmer = false
-
-    var body: some View {
-        Button(action: onTap) {
-            ZStack(alignment: .topTrailing) {
-                // Background
-                RoundedRectangle(cornerRadius: Radius.lg, style: .continuous)
-                    .fill(LinearGradient(
-                        colors: [Color(hex: "1A1500"), Color(hex: "0F0C00")],
-                        startPoint: .topLeading, endPoint: .bottomTrailing
-                    ))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: Radius.lg, style: .continuous)
-                            .strokeBorder(
-                                LinearGradient(
-                                    colors: [Color.goldPrimary.opacity(0.8), Color.goldSecondary.opacity(0.3),
-                                             Color.goldPrimary.opacity(0.1)],
-                                    startPoint: .topLeading, endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1.5
-                            )
-                    )
-
-                // Shimmer sweep
-                RoundedRectangle(cornerRadius: Radius.lg, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.clear, Color.white.opacity(shimmer ? 0.04 : 0), Color.clear],
-                            startPoint: UnitPoint(x: shimmer ? 1.2 : -0.2, y: 0),
-                            endPoint: UnitPoint(x: shimmer ? 1.8 : 0.4, y: 1)
-                        )
-                    )
-                    .allowsHitTesting(false)
-
-                // Radial glow bottom-right
-                RadialGradient(
-                    colors: [Color.goldPrimary.opacity(0.18), Color.clear],
-                    center: .bottomTrailing, startRadius: 0, endRadius: 160
-                )
-                .clipShape(RoundedRectangle(cornerRadius: Radius.lg, style: .continuous))
-                .allowsHitTesting(false)
-
-                HStack(spacing: Spacing.md) {
-                    // Icon
-                    ZStack {
-                        Circle()
-                            .fill(Color.goldPrimary.opacity(0.15))
-                            .frame(width: 52, height: 52)
-                        Image(systemName: isPremium ? "crown.fill" : "crown")
-                            .font(.system(size: 24, weight: .semibold))
-                            .foregroundStyle(LinearGradient.goldGradient)
-                    }
-
-                    VStack(alignment: .leading, spacing: 3) {
-                        if isPremium {
-                            Label("Premium Active", systemImage: "checkmark.seal.fill")
-                                .font(.captionLarge).foregroundStyle(.goldPrimary).fontWeight(.semibold)
-                        } else {
-                            Text("Hydrio Premium")
-                                .font(.titleMedium).foregroundStyle(.textPrimary)
-                            Text("Lifetime access · $4.99 one-time")
-                                .font(.captionLarge).foregroundStyle(.goldPrimary)
-                        }
-                        if !isPremium {
-                            HStack(spacing: Spacing.sm) {
-                                ForEach(["Analytics", "AI Coach", "Pet Evolution"], id: \.self) { f in
-                                    Text(f)
-                                        .font(.captionSmall)
-                                        .foregroundStyle(.textSecondary)
-                                        .padding(.horizontal, 6).padding(.vertical, 2)
-                                        .background(Capsule().fill(Color.white.opacity(0.06)))
-                                }
-                            }
-                        }
-                    }
-
-                    Spacer()
-
-                    if !isPremium {
-                        Text("Upgrade")
-                            .font(.captionLarge).fontWeight(.bold)
-                            .foregroundStyle(Color(hex: "0B0B0B"))
-                            .padding(.horizontal, Spacing.md).padding(.vertical, Spacing.sm)
-                            .background(LinearGradient.goldGradient)
-                            .clipShape(Capsule())
-                            .shadow(color: Color.goldPrimary.opacity(0.4), radius: 8, y: 4)
-                    }
-                }
-                .padding(Spacing.md)
-            }
-        }
-        .buttonStyle(ScaleButtonStyle())
-        .onAppear {
-            withAnimation(.easeInOut(duration: 2.5).repeatForever(autoreverses: false)) {
-                shimmer = true
-            }
-        }
     }
 }
 
@@ -624,280 +478,6 @@ struct RateAppRow: View {
             .padding(.vertical, Spacing.sm)
         }
         .buttonStyle(.plain)
-    }
-}
-
-// MARK: - Premium Sheet
-
-struct PremiumSheet: View {
-    @EnvironmentObject var store: StoreManager
-    @Environment(\.dismiss) private var dismiss
-    @State private var appeared = false
-    @State private var pulseCrown = false
-    @State private var showErrorAlert = false
-    @State private var showRestoreAlert = false
-    @State private var restoreMessage = ""
-
-    let features: [(icon: String, color: Color, title: String, desc: String)] = [
-        ("pawprint.fill",      Color(hex: "FF8F00"), "Unlock All Pet Companions",         "Adopt Ember the Dragon & Nimbus the Cloud, and grow them to legendary stages."),
-        ("clock.badge.fill",   Color(hex: "5E5CE6"), "Advanced Notification Schedule",    "Set your own morning start and evening cutoff — reminders only fire when you want them."),
-        ("chart.xyaxis.line",  Color(hex: "4DA6FF"), "Full Analytics & Stats",            "Weekly trends, monthly charts, streaks and detailed hydration insights."),
-        ("drop.fill",          Color(hex: "4DA6FF"), "Unlimited Drink Logging",           "Log as many drinks as you need — no daily cap."),
-        ("brain.head.profile", Color(hex: "9C27B0"), "AI Hydration Coach",               "Personalised contextual tips that adapt to your progress and schedule."),
-        ("star.fill",          Color(hex: "D4AF37"), "All Future Features",               "Every new feature we ship, you unlock automatically — no further payments."),
-    ]
-
-    var body: some View {
-        ZStack {
-            Color.appBackground.ignoresSafeArea()
-            // Background glow
-            RadialGradient(colors: [Color.goldPrimary.opacity(0.12), Color.clear],
-                           center: .top, startRadius: 0, endRadius: 380)
-                .ignoresSafeArea()
-
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: Spacing.lg) {
-
-                    // MARK: Hero
-                    VStack(spacing: Spacing.md) {
-                        ZStack {
-                            Circle()
-                                .fill(Color.goldPrimary.opacity(pulseCrown ? 0.22 : 0.10))
-                                .frame(width: 110, height: 110)
-                                .blur(radius: 20)
-                                .animation(.easeInOut(duration: 1.8).repeatForever(autoreverses: true), value: pulseCrown)
-
-                            Image(systemName: "crown.fill")
-                                .font(.system(size: 52))
-                                .foregroundStyle(LinearGradient.goldGradient)
-                                .shadow(color: Color.goldPrimary.opacity(0.6), radius: 16)
-                                .scaleEffect(appeared ? 1.0 : 0.6)
-                                .opacity(appeared ? 1 : 0)
-                                .animation(.spring(response: 0.6, dampingFraction: 0.65).delay(0.1), value: appeared)
-                        }
-
-                        VStack(spacing: Spacing.xs) {
-                            Text("Hydrio Premium")
-                                .font(.displaySmall).foregroundStyle(.textPrimary)
-                            Text("Own it forever. No subscriptions.")
-                                .font(.bodyMedium).foregroundStyle(.textSecondary)
-                        }
-
-                        // Price tag
-                        ZStack(alignment: .topTrailing) {
-                            HStack(spacing: Spacing.sm) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Lifetime Access")
-                                        .font(.titleMedium).foregroundStyle(Color(hex: "0B0B0B"))
-                                    Text("Pay once, yours forever")
-                                        .font(.captionLarge).foregroundStyle(Color(hex: "0B0B0B").opacity(0.65))
-                                }
-                                Spacer()
-                                VStack(alignment: .trailing, spacing: 0) {
-                                    Text(store.product?.displayPrice ?? "$4.99")
-                                        .font(.numberMedium).foregroundStyle(Color(hex: "0B0B0B"))
-                                    Text("one-time")
-                                        .font(.captionSmall).foregroundStyle(Color(hex: "0B0B0B").opacity(0.6))
-                                }
-                            }
-                            .padding(.horizontal, Spacing.md)
-                            .padding(.vertical, Spacing.md)
-                            .background(
-                                RoundedRectangle(cornerRadius: Radius.md, style: .continuous)
-                                    .fill(LinearGradient.goldGradient)
-                                    .shadow(color: Color.goldPrimary.opacity(0.45), radius: 12, y: 6)
-                            )
-
-                            Text("BEST DEAL")
-                                .font(.captionSmall).fontWeight(.black)
-                                .foregroundStyle(.goldPrimary)
-                                .padding(.horizontal, 8).padding(.vertical, 3)
-                                .background(Color(hex: "0B0B0B"))
-                                .clipShape(Capsule())
-                                .offset(x: -12, y: -10)
-                        }
-                        .padding(.horizontal, Spacing.md)
-                        .opacity(appeared ? 1 : 0)
-                        .offset(y: appeared ? 0 : 16)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.75).delay(0.2), value: appeared)
-                    }
-                    .padding(.top, Spacing.xl)
-
-                    // MARK: Features list
-                    GlassCard(padding: Spacing.md) {
-                        VStack(spacing: 0) {
-                            ForEach(Array(features.enumerated()), id: \.offset) { idx, f in
-                                HStack(spacing: Spacing.md) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 9, style: .continuous)
-                                            .fill(f.color.opacity(0.15))
-                                            .frame(width: 36, height: 36)
-                                        Image(systemName: f.icon)
-                                            .font(.system(size: 16, weight: .semibold))
-                                            .foregroundStyle(f.color)
-                                    }
-                                    VStack(alignment: .leading, spacing: 1) {
-                                        Text(f.title).font(.titleSmall).foregroundStyle(.textPrimary)
-                                        Text(f.desc).font(.captionLarge).foregroundStyle(.textSecondary)
-                                    }
-                                    Spacer()
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundStyle(.goldPrimary).font(.bodyMedium)
-                                }
-                                .padding(.vertical, Spacing.sm)
-                                .opacity(appeared ? 1 : 0)
-                                .offset(x: appeared ? 0 : 28)
-                                .animation(.spring(response: 0.5, dampingFraction: 0.8)
-                                    .delay(0.25 + Double(idx) * 0.07), value: appeared)
-
-                                if idx < features.count - 1 {
-                                    Divider().background(Color.white.opacity(0.06))
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal, Spacing.md)
-
-                    // MARK: CTA
-                    VStack(spacing: Spacing.sm) {
-                        // Buy button
-                        Button {
-                            Task {
-                                await store.purchase()
-                                if store.isPremium {
-                                    let impact = UINotificationFeedbackGenerator()
-                                    impact.notificationOccurred(.success)
-                                    dismiss()
-                                } else if let err = store.purchaseState.errorMessage {
-                                    store.resetState()
-                                    restoreMessage = err
-                                    showErrorAlert = true
-                                }
-                            }
-                        } label: {
-                            HStack {
-                                if store.purchaseState == .purchasing {
-                                    ProgressView().tint(Color(hex: "0B0B0B")).scaleEffect(0.85)
-                                } else {
-                                    Image(systemName: "crown.fill")
-                                }
-                                Text(store.purchaseState == .purchasing
-                                     ? "Processing…"
-                                     : "Get Lifetime Access — \(store.product?.displayPrice ?? "$4.99")")
-                                    .fontWeight(.semibold)
-                            }
-                            .font(.titleSmall)
-                            .foregroundStyle(Color(hex: "0B0B0B"))
-                            .frame(maxWidth: .infinity).frame(height: 56)
-                            .background(LinearGradient.goldGradient)
-                            .clipShape(RoundedRectangle(cornerRadius: Radius.full, style: .continuous))
-                            .shadow(color: Color.goldPrimary.opacity(0.4), radius: 12, y: 6)
-                        }
-                        .buttonStyle(ScaleButtonStyle())
-                        .disabled(store.purchaseState.isLoading)
-
-                        // Apple payment info
-                        GlassCard(padding: Spacing.sm) {
-                            VStack(spacing: 4) {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "applelogo")
-                                        .font(.captionLarge)
-                                        .foregroundStyle(.textSecondary)
-                                    Text("Payment via Apple ID")
-                                        .font(.captionLarge).fontWeight(.semibold)
-                                        .foregroundStyle(.textSecondary)
-                                }
-                                Text("\(store.product?.displayPrice ?? "$4.99") charged once to your Apple ID at confirmation. No subscription, no recurring fees — yours forever.")
-                                    .font(.captionSmall).foregroundStyle(.textTertiary)
-                                    .multilineTextAlignment(.center)
-                                    .lineSpacing(2)
-                            }
-                        }
-
-                        // Restore button
-                        Button {
-                            Task {
-                                await store.restore()
-                                if store.isPremium {
-                                    restoreMessage = "Your purchase has been restored successfully."
-                                } else {
-                                    restoreMessage = store.purchaseState.errorMessage
-                                        ?? "No previous purchases found for this Apple ID."
-                                }
-                                store.resetState()
-                                showRestoreAlert = true
-                            }
-                        } label: {
-                            HStack(spacing: 6) {
-                                if store.purchaseState == .restoring {
-                                    ProgressView().tint(.textSecondary).scaleEffect(0.8)
-                                }
-                                Text(store.purchaseState == .restoring ? "Restoring…" : "Restore Purchase")
-                            }
-                            .font(.bodySmall).foregroundStyle(.textSecondary)
-                        }
-                        .disabled(store.purchaseState.isLoading)
-
-                        Text("One-time purchase · No subscription · No hidden fees")
-                            .font(.captionSmall).foregroundStyle(.textTertiary)
-                            .multilineTextAlignment(.center)
-
-                        // Legal links
-                        HStack(spacing: Spacing.md) {
-                            Button {
-                                if let url = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/") {
-                                    UIApplication.shared.open(url)
-                                }
-                            } label: {
-                                Text("Terms of Use & EULA")
-                                    .font(.captionSmall).foregroundStyle(.textTertiary)
-                                    .underline()
-                            }
-                            Text("·").font(.captionSmall).foregroundStyle(.textTertiary)
-                            Button {
-                                if let url = URL(string: "https://manhcuong5311-hue.github.io/Hydrio/") {
-                                    UIApplication.shared.open(url)
-                                }
-                            } label: {
-                                Text("Privacy Policy")
-                                    .font(.captionSmall).foregroundStyle(.textTertiary)
-                                    .underline()
-                            }
-                        }
-                    }
-                    .padding(.horizontal, Spacing.xl)
-                    .padding(.bottom, Spacing.xxl)
-                    .alert("Purchase Failed", isPresented: $showErrorAlert) {
-                        Button("OK", role: .cancel) {}
-                    } message: {
-                        Text(restoreMessage)
-                    }
-                    .alert("Restore Purchase", isPresented: $showRestoreAlert) {
-                        Button("OK", role: .cancel) {}
-                    } message: {
-                        Text(restoreMessage)
-                    }
-                }
-            }
-
-            // Close button
-            VStack {
-                HStack {
-                    Spacer()
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundStyle(Color.white.opacity(0.25))
-                    }
-                    .padding([.top, .trailing], Spacing.md)
-                }
-                Spacer()
-            }
-        }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { appeared = true }
-            pulseCrown = true
-        }
     }
 }
 
@@ -1082,7 +662,7 @@ struct PrivacyPolicySheet: View {
 
         PolicySection(icon: "shareplay",           color: Color(hex: "9C27B0"),
                       title: "Third-Party Sharing",
-                      text: "We do not sell, trade, or transfer your personal information to any third parties. Hydrio does not contain any advertising SDKs, analytics trackers, or data brokers."),
+                      text: "We do not sell, trade, or transfer your personal information to any third parties. Hydrio shows ads through Google AdMob unless you purchase Remove Ads; AdMob may use device identifiers to serve ads, subject to your consent and App Tracking Transparency choice."),
 
         PolicySection(icon: "heart.fill",          color: Color(hex: "FF5252"),
                       title: "Apple Health",
@@ -1158,9 +738,6 @@ struct NotificationWindowSection: View {
     @ObservedObject var window: NotificationWindowManager
     let isEnabled: Bool
     let onWindowChange: () -> Void
-    let onUpgradeTap: () -> Void
-
-    @EnvironmentObject var premiumManager: PremiumManager
 
     // Bindings that read/write NotificationWindowManager via Date
     private var morningBinding: Binding<Date> {
@@ -1207,19 +784,6 @@ struct NotificationWindowSection: View {
                     .font(.captionLarge).foregroundStyle(.goldPrimary)
                 Text("NOTIFICATION SCHEDULE")
                     .font(.captionLarge).fontWeight(.semibold).foregroundStyle(.textSecondary)
-                Spacer()
-                if !premiumManager.isPremium {
-                    HStack(spacing: 4) {
-                        Image(systemName: "crown.fill")
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(.goldPrimary)
-                        Text("Premium")
-                            .font(.captionSmall).fontWeight(.semibold).foregroundStyle(.goldPrimary)
-                    }
-                    .padding(.horizontal, 8).padding(.vertical, 3)
-                    .background(Color.goldPrimary.opacity(0.1))
-                    .clipShape(Capsule())
-                }
             }
             .padding(.horizontal, Spacing.md)
 
@@ -1252,7 +816,6 @@ struct NotificationWindowSection: View {
                         icon: "sunrise.fill",
                         iconColor: Color(hex: "FF9500"),
                         label: "Morning Start",
-                        time: window.morningDisplayTime,
                         binding: morningBinding
                     )
 
@@ -1263,41 +826,8 @@ struct NotificationWindowSection: View {
                         icon: "moon.fill",
                         iconColor: Color(hex: "5E5CE6"),
                         label: "Evening End",
-                        time: window.eveningDisplayTime,
                         binding: eveningBinding
                     )
-
-                    // Locked overlay for free users
-                    if !premiumManager.isPremium {
-                        SettingsDivider().padding(.vertical, Spacing.sm)
-
-                        Button(action: onUpgradeTap) {
-                            HStack(spacing: Spacing.sm) {
-                                Image(systemName: "lock.fill")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundStyle(.goldPrimary)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("Unlock Custom Schedule")
-                                        .font(.titleSmall).foregroundStyle(.textPrimary)
-                                    Text("Set your own start and end times with Premium.")
-                                        .font(.captionLarge).foregroundStyle(.textSecondary)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.captionSmall).foregroundStyle(.textTertiary)
-                            }
-                            .padding(Spacing.sm)
-                            .background(
-                                RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                                    .fill(Color.goldPrimary.opacity(0.06))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: Radius.sm, style: .continuous)
-                                            .strokeBorder(Color.goldPrimary.opacity(0.2), lineWidth: 1)
-                                    )
-                            )
-                        }
-                        .buttonStyle(ScaleButtonStyle())
-                    }
                 }
             }
             .padding(.horizontal, Spacing.md)
@@ -1309,7 +839,6 @@ struct NotificationWindowSection: View {
         icon: String,
         iconColor: Color,
         label: String,
-        time: String,
         binding: Binding<Date>
     ) -> some View {
         HStack(spacing: Spacing.md) {
@@ -1325,25 +854,10 @@ struct NotificationWindowSection: View {
                 .font(.bodyMedium).foregroundStyle(.textPrimary)
             Spacer()
 
-            if premiumManager.isPremium {
-                DatePicker("", selection: binding, displayedComponents: .hourAndMinute)
-                    .labelsHidden()
-                    .tint(.goldPrimary)
-                    .colorScheme(.dark)
-            } else {
-                // Show static time + lock icon for free users
-                HStack(spacing: 6) {
-                    Text(time)
-                        .font(.titleSmall).foregroundStyle(.textSecondary)
-                    Image(systemName: "lock.fill")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(.goldPrimary.opacity(0.6))
-                }
-            }
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            if !premiumManager.isPremium { onUpgradeTap() }
+            DatePicker("", selection: binding, displayedComponents: .hourAndMinute)
+                .labelsHidden()
+                .tint(.goldPrimary)
+                .colorScheme(.dark)
         }
     }
 }

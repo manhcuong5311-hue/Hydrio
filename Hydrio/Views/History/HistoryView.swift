@@ -2,10 +2,8 @@ import SwiftUI
 
 struct HistoryView: View {
     @EnvironmentObject var vm: HydrationViewModel
-    @EnvironmentObject var store: StoreManager
     @State private var selectedDate = Date()
     @State private var selectedMonth = Date()
-    @State private var showHistoryPaywall = false
 
     private let calendar = Calendar.current
 
@@ -38,9 +36,6 @@ struct HistoryView: View {
                     Spacer(minLength: 120)
                 }
             }
-        }
-        .sheet(isPresented: $showHistoryPaywall) {
-            PremiumSheet().environmentObject(store)
         }
     }
 }

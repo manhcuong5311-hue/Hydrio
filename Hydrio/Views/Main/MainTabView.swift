@@ -5,12 +5,17 @@ import SwiftUI
 struct MainTabView: View {
     @EnvironmentObject var vm: HydrationViewModel
     @EnvironmentObject var store: StoreManager
-    @EnvironmentObject var premiumManager: PremiumManager
     @EnvironmentObject var notificationWindow: NotificationWindowManager
+    @ObservedObject private var ads = AdsManager.shared
     @State private var selectedTab = 0
     @State private var showAddSheet = false
     @State private var showAchievementToast = false
     @State private var toastAchievement: Achievement? = nil
+
+    /// Extra bottom space taken by the banner slot (0 while no ad is shown).
+    private var bannerClearance: CGFloat {
+        ads.bannerInset > 0 ? ads.bannerInset + BannerSlot.framePadding * 2 : 0
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -27,11 +32,14 @@ struct MainTabView: View {
                 default: SettingsView()
                 }
             }
+            // Keep scroll content clear of the ad banner (0 when no banner is shown).
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Color.clear.frame(height: bannerClearance)
+            }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .transition(.opacity)
             .environmentObject(vm)
             .environmentObject(store)
-            .environmentObject(premiumManager)
             .environmentObject(notificationWindow)
 
             // MARK: Undo Toast — slides up from above the bar
@@ -40,7 +48,7 @@ struct MainTabView: View {
                     Spacer()
                     UndoToast(entry: entry)
                         .padding(.horizontal, Spacing.md)
-                        .padding(.bottom, 108)
+                        .padding(.bottom, 108 + bannerClearance)
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
                 .animation(.spring(response: 0.4, dampingFraction: 0.8), value: vm.showUndoToast)
@@ -63,30 +71,23 @@ struct MainTabView: View {
                 }
             }
 
-            // MARK: Custom Bottom Bar — compact tab bar + plus button on the same row
-            HStack(spacing: 10) {
-                CompactTabBar(selectedTab: $selectedTab)
-                AddPlusButton { showAddSheet = true }
+            // MARK: Custom Bottom Bar — ad banner (non ad-free only) above
+            // the compact tab bar + plus button row
+            VStack(spacing: bannerClearance > 0 ? AdsConfig.bannerSpacing : 0) {
+                BannerSlot(isVisible: bannerClearance > 0)
+
+                HStack(spacing: 10) {
+                    CompactTabBar(selectedTab: $selectedTab)
+                    AddPlusButton { showAddSheet = true }
+                }
+                .padding(.horizontal, 16)
             }
-            .padding(.horizontal, 16)
             .padding(.bottom, 28)
             .zIndex(10)
         }
         .ignoresSafeArea(edges: .bottom)
         .sheet(isPresented: $showAddSheet) {
             CustomAddView().environmentObject(vm)
-        }
-        // Daily premium wall — shown max once per day for free users
-        .sheet(isPresented: $premiumManager.showPremiumWall) {
-            PremiumSheet()
-                .environmentObject(store)
-                .environmentObject(premiumManager)
-        }
-        .onChange(of: selectedTab) { _, newTab in
-            // Trigger the daily wall when the user opens the Home or Stats tab
-            if newTab == 0 || newTab == 2 {
-                premiumManager.triggerWallIfNeeded()
-            }
         }
         .onChange(of: vm.newlyUnlocked) { _, unlocked in
             guard let first = unlocked.first else { return }
@@ -102,9 +103,6 @@ struct MainTabView: View {
 
 struct CompactTabBar: View {
     @Binding var selectedTab: Int
-    @EnvironmentObject var store: StoreManager
-    @EnvironmentObject var premiumManager: PremiumManager
-    @State private var showStatsPaywall = false
     @Namespace private var indicator
 
     private struct TabItem {
@@ -123,13 +121,6 @@ struct CompactTabBar: View {
         HStack(spacing: 0) {
             ForEach(0..<items.count, id: \.self) { i in
                 Button {
-                    // Stats tab (index 2) locked for free users
-                    if i == 2 && !store.isPremium {
-                        let impact = UIImpactFeedbackGenerator(style: .medium)
-                        impact.impactOccurred()
-                        showStatsPaywall = true
-                        return
-                    }
                     guard selectedTab != i else { return }
                     let impact = UIImpactFeedbackGenerator(style: .light)
                     impact.impactOccurred()
@@ -152,34 +143,12 @@ struct CompactTabBar: View {
                                 ? AnyShapeStyle(LinearGradient.goldGradient)
                                 : AnyShapeStyle(Color.white.opacity(0.4)))
                             .scaleEffect(selectedTab == i ? 1.08 : 1.0)
-
-                        // Lock badge on Stats for free users
-                        if i == 2 && !store.isPremium {
-                            VStack {
-                                HStack {
-                                    Spacer()
-                                    Image(systemName: "lock.fill")
-                                        .font(.system(size: 8, weight: .bold))
-                                        .foregroundStyle(.goldPrimary)
-                                        .padding(3)
-                                        .background(Circle().fill(Color(hex: "161616")))
-                                        .offset(x: 4, y: -4)
-                                }
-                                Spacer()
-                            }
-                            .frame(width: 28, height: 28)
-                        }
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
                 }
                 .buttonStyle(.plain)
             }
-        }
-        .sheet(isPresented: $showStatsPaywall) {
-            PremiumSheet()
-                .environmentObject(store)
-                .environmentObject(premiumManager)
         }
         .background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
@@ -190,6 +159,31 @@ struct CompactTabBar: View {
                 )
                 .shadow(color: Color.black.opacity(0.55), radius: 24, x: 0, y: 8)
         )
+    }
+}
+
+// MARK: - Banner Slot
+
+/// Hosts the AdMob banner above the tab bar. The card frame is drawn *behind*
+/// the ad (padding + background only) so the ad itself is never covered or
+/// clipped (AdMob policy). Takes no space until an ad has loaded.
+private struct BannerSlot: View {
+    let isVisible: Bool
+    static let framePadding: CGFloat = 4
+
+    var body: some View {
+        AdBannerView()
+            .padding(isVisible ? Self.framePadding : 0)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color(hex: "161616"))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .strokeBorder(Color.white.opacity(0.08), lineWidth: 1)
+                    )
+                    .opacity(isVisible ? 1 : 0)
+                    .allowsHitTesting(false)
+            )
     }
 }
 

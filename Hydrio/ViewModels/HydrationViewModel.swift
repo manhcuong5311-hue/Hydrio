@@ -16,7 +16,6 @@ final class HydrationViewModel: ObservableObject {
     @Published var isAnimatingDrop: Bool           = false
     @Published var showUndoToast:   Bool           = false
     @Published var lastAddedEntry:  DrinkEntry?    = nil
-    var isPremium: Bool { UserDefaults.standard.bool(forKey: "isPremium") }
 
     private let service = HydrationService()
     private var wasGoalReached = false
@@ -90,11 +89,8 @@ final class HydrationViewModel: ObservableObject {
             self.isAnimatingDrop = false
         }
 
-        // Pet XP — free tier capped at stage 2 (.plant)
-        let xpGained = max(5, Int(amountML / 50))
-        if isPremium || pet.growthStage.rawValue < PetGrowthStage.plant.rawValue {
-            pet.addXP(xpGained)
-        }
+        // Pet XP
+        pet.addXP(max(5, Int(amountML / 50)))
         pet.happiness = min(1.0, pet.happiness + 0.05)
         service.savePet(pet)
 
@@ -119,6 +115,9 @@ final class HydrationViewModel: ObservableObject {
         }
         undoWorkItem = work
         DispatchQueue.main.asyncAfter(deadline: .now() + 4, execute: work)
+
+        // Counts toward the interstitial frequency cap (no-op for ad-free users).
+        AdsManager.shared.recordAction()
     }
 
     func undoLastDrink() {

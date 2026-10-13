@@ -1,5 +1,4 @@
 import SwiftUI
-import StoreKit
 
 struct OnboardingView: View {
     @EnvironmentObject var hydrationVM: HydrationViewModel
@@ -37,11 +36,10 @@ struct OnboardingView: View {
                     OnboardingBenefitsPage(onNext: vm.next).tag(1)
                     OnboardingProfilePage(vm: vm, onNext: vm.next).tag(2)
                     OnboardingGoalPage(vm: vm, onNext: vm.next).tag(3)
-                    OnboardingReminderPage(vm: vm, onNext: vm.next).tag(4)
-                    OnboardingPremiumPage(vm: vm, onFinish: {
+                    OnboardingReminderPage(vm: vm, onFinish: {
                         vm.finish(hydrationVM: hydrationVM)
                         withAnimation { hasCompletedOnboarding = true }
-                    }).tag(5)
+                    }).tag(4)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.35), value: vm.currentPage)
@@ -429,11 +427,11 @@ struct OnboardingGoalPage: View {
     }
 }
 
-// MARK: - Page 5: Reminders
+// MARK: - Page 5: Reminders (last page)
 
 struct OnboardingReminderPage: View {
     @ObservedObject var vm: OnboardingViewModel
-    let onNext: () -> Void
+    let onFinish: () -> Void
     @State private var appeared = false
 
     var body: some View {
@@ -494,129 +492,13 @@ struct OnboardingReminderPage: View {
 
             Spacer()
 
-            PrimaryButton("Set Reminders", icon: "bell.fill") { onNext() }
+            PrimaryButton("Get Started", icon: "drop.fill") { onFinish() }
                 .padding(.horizontal, Spacing.xl)
                 .padding(.bottom, Spacing.xxl)
         }
         .opacity(appeared ? 1 : 0)
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { appeared = true }
-        }
-    }
-}
-
-// MARK: - Page 6: Premium
-
-struct OnboardingPremiumPage: View {
-    @ObservedObject var vm: OnboardingViewModel
-    @EnvironmentObject var store: StoreManager
-    let onFinish: () -> Void
-    @State private var appeared = false
-    @State private var showErrorAlert = false
-    @State private var errorMessage = ""
-
-    let features: [(icon: String, text: String)] = [
-        ("chart.xyaxis.line", "Advanced analytics & trends"),
-        ("drop.fill",         "Unlimited drink types"),
-        ("brain.head.profile","AI hydration coach"),
-        ("pawprint.fill",     "Full pet evolution system"),
-        ("bell.badge.fill",   "Smart reminder scheduling"),
-    ]
-
-    var body: some View {
-        VStack(spacing: Spacing.lg) {
-            Spacer()
-
-            // Crown icon
-            ZStack {
-                Circle().fill(Color.goldPrimary.opacity(0.15)).frame(width: 110, height: 110).blur(radius: 15)
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 56)).foregroundStyle(LinearGradient.goldGradient)
-                    .shadow(color: Color.goldPrimary.opacity(0.5), radius: 12)
-            }
-
-            VStack(spacing: Spacing.sm) {
-                Text("Go Premium")
-                    .font(.displaySmall).foregroundStyle(.textPrimary)
-                Text("Lifetime Access — \(store.product?.displayPrice ?? "$4.99")")
-                    .font(.bodyMedium).foregroundStyle(.goldPrimary)
-            }
-
-            // Features
-            VStack(alignment: .leading, spacing: Spacing.sm) {
-                ForEach(features, id: \.icon) { f in
-                    HStack(spacing: Spacing.md) {
-                        Image(systemName: f.icon)
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.goldPrimary)
-                            .frame(width: 24)
-                        Text(f.text).font(.bodyMedium).foregroundStyle(.textPrimary)
-                        Spacer()
-                        Image(systemName: "checkmark").font(.captionLarge).foregroundStyle(.goldPrimary)
-                    }
-                }
-            }
-            .padding(Spacing.md)
-            .background(
-                RoundedRectangle(cornerRadius: Radius.lg).fill(Color.goldPrimary.opacity(0.06))
-                    .overlay(RoundedRectangle(cornerRadius: Radius.lg).strokeBorder(Color.goldPrimary.opacity(0.2), lineWidth: 1))
-            )
-            .padding(.horizontal, Spacing.md)
-
-            Spacer()
-
-            VStack(spacing: Spacing.sm) {
-                // Buy button
-                Button {
-                    Task {
-                        await store.purchase()
-                        if store.isPremium {
-                            let impact = UINotificationFeedbackGenerator()
-                            impact.notificationOccurred(.success)
-                            onFinish()
-                        } else if let err = store.purchaseState.errorMessage {
-                            store.resetState()
-                            errorMessage = err
-                            showErrorAlert = true
-                        }
-                        // .userCancelled / .pending → do nothing, stay on page
-                    }
-                } label: {
-                    HStack {
-                        if store.purchaseState == .purchasing {
-                            ProgressView().tint(Color(hex: "0B0B0B")).scaleEffect(0.85)
-                        } else {
-                            Image(systemName: "crown.fill")
-                        }
-                        Text(store.purchaseState == .purchasing
-                             ? "Processing…"
-                             : "Get Lifetime Access — \(store.product?.displayPrice ?? "$4.99")")
-                            .font(.titleSmall).fontWeight(.semibold)
-                    }
-                    .foregroundStyle(Color(hex: "0B0B0B"))
-                    .frame(maxWidth: .infinity).frame(height: 56)
-                    .background(LinearGradient.goldGradient)
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.full, style: .continuous))
-                    .shadow(color: Color.goldPrimary.opacity(0.4), radius: 12, y: 6)
-                }
-                .buttonStyle(ScaleButtonStyle())
-                .disabled(store.purchaseState.isLoading)
-
-                Button("Continue with Free") { onFinish() }
-                    .font(.bodyMedium).foregroundStyle(.textSecondary)
-                    .disabled(store.purchaseState.isLoading)
-            }
-            .padding(.horizontal, Spacing.xl)
-            .padding(.bottom, Spacing.xxl)
-        }
-        .opacity(appeared ? 1 : 0)
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { appeared = true }
-        }
-        .alert("Purchase Failed", isPresented: $showErrorAlert) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(errorMessage)
         }
     }
 }

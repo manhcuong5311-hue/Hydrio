@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		0DA1D5032F9B000000ADF4EE /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 0DA1D5022F9B000000ADF4EE /* GoogleMobileAds */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		0DC72F832F6ABD3B00D7B577 /* Hydrio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Hydrio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0DA1D5032F9B000000ADF4EE /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = Hydrio;
 			packageProductDependencies = (
+				0DA1D5022F9B000000ADF4EE /* GoogleMobileAds */,
 			);
 			productName = Hydrio;
 			productReference = 0DC72F832F6ABD3B00D7B577 /* Hydrio.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = 0DC72F7A2F6ABD3B00D7B577;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				0DA1D5012F9B000000ADF4EE /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0DC72F842F6ABD3B00D7B577 /* Products */;
 			projectDirPath = "";
@@ -256,6 +265,7 @@
 				DEVELOPMENT_TEAM = 553U32259K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Hydrio-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -289,6 +299,7 @@
 				DEVELOPMENT_TEAM = 553U32259K;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Hydrio-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -334,6 +345,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0DA1D5012F9B000000ADF4EE /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 13.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0DA1D5022F9B000000ADF4EE /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0DA1D5012F9B000000ADF4EE /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 0DC72F7B2F6ABD3B00D7B577 /* Project object */;
 }

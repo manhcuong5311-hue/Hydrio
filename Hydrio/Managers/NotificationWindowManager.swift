@@ -6,8 +6,7 @@ import Combine
 /// Manages the safe notification delivery window.
 ///
 /// Default window: 08:00 – 21:00.
-/// Free users are locked to this default.
-/// Premium users can customise both the morning start and evening end times.
+/// Users can customise both the morning start and evening end times in Settings.
 ///
 /// A shared singleton is used so HydrationViewModel can reach it without
 /// requiring an injected dependency.

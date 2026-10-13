@@ -2,7 +2,6 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var vm: HydrationViewModel
-    @EnvironmentObject var premiumManager: PremiumManager
     @State private var showGoalBanner = false
 
     var body: some View {
@@ -111,11 +110,6 @@ struct HomeView: View {
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .zIndex(10)
             }
-        }
-        .onAppear {
-            // Trigger the daily premium wall when the user opens the home screen.
-            // This fires once per day for free users (after a meaningful screen view).
-            premiumManager.triggerWallIfNeeded()
         }
         .onChange(of: vm.showGoalReached) { _, reached in
             if reached {

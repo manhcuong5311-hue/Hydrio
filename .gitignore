@@ -1,0 +1,6 @@
+# macOS metadata
+.DS_Store
+._*
+
+# Local xcodebuild derived data
+DD/

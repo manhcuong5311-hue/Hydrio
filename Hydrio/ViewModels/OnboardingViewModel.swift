@@ -10,7 +10,7 @@ final class OnboardingViewModel: ObservableObject {
     @Published var reminderInterval: ReminderInterval = .oneHour
     @Published var selectedGoalML: Double  = 2300
 
-    let totalPages = 6
+    let totalPages = 5
 
     var profile: UserProfile {
         UserProfile(name: name, weight: weight, gender: gender,

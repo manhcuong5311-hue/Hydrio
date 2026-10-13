@@ -3,9 +3,7 @@ import SwiftUI
 @main
 struct HydrioApp: App {
 
-    // Store must be created first so PremiumManager can observe it.
     @StateObject private var store: StoreManager
-    @StateObject private var premiumManager: PremiumManager
     @StateObject private var hydrationVM = HydrationViewModel()
     @StateObject private var notificationWindow = NotificationWindowManager.shared
 
@@ -14,7 +12,8 @@ struct HydrioApp: App {
     init() {
         let store = StoreManager()
         _store = StateObject(wrappedValue: store)
-        _premiumManager = StateObject(wrappedValue: PremiumManager(store: store))
+        // Ads run only while the user hasn't bought "Remove Ads".
+        AdsManager.shared.bind(isAdFree: store.$isAdFree)
     }
 
     var body: some Scene {
@@ -24,13 +23,12 @@ struct HydrioApp: App {
                     MainTabView()
                         .environmentObject(hydrationVM)
                         .environmentObject(store)
-                        .environmentObject(premiumManager)
                         .environmentObject(notificationWindow)
+                        // Consent form / ATT prompt only once the main UI is up — never during onboarding.
+                        .onAppear { AdsManager.shared.activate() }
                 } else {
                     OnboardingView()
                         .environmentObject(hydrationVM)
-                        .environmentObject(store)
-                        .environmentObject(premiumManager)
                         .environmentObject(notificationWindow)
                 }
             }
